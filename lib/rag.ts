@@ -8,6 +8,7 @@ import weaviate from "weaviate-client";
 import { WeaviateStore } from "@langchain/weaviate";
 import { OllamaEmbeddings, Ollama } from "@langchain/ollama";
 import settings from "./settings";
+import OpenAI from "openai";
 
 
 
@@ -29,8 +30,37 @@ export async function loadPDF(pdfPath: string) {
   for (let i = 1; i <= pdfDoc.numPages; i++) {
     const page = await pdfDoc.getPage(i);
     const textContent = await page.getTextContent();
-    const text = textContent.items.map((item: any) => item.str).join(" ");
-    rawDocs.push(new Document({ pageContent: text, metadata: { loc: { pageNumber: i } } }));
+
+    // Sort and reconstruct lines using spatial Y and X coordinates to preserve layout & tables
+    const textItems = textContent.items as any[];
+    const deltaY = 5; // vertical threshold for elements on the same line
+    const rows: { y: number; items: { x: number; str: string }[] }[] = [];
+
+    for (const item of textItems) {
+      if (!item.str || item.str.trim() === "") continue;
+      const x = item.transform[4];
+      const y = item.transform[5];
+
+      let foundRow = rows.find((r) => Math.abs(r.y - y) < deltaY);
+      if (!foundRow) {
+        foundRow = { y, items: [] };
+        rows.push(foundRow);
+      }
+      foundRow.items.push({ x, str: item.str });
+    }
+
+    // Sort rows from top to bottom (Y decreases top-to-bottom in PDF space)
+    rows.sort((a, b) => b.y - a.y);
+
+    const text = rows
+      .map((row) => {
+        // Sort columns from left to right
+        row.items.sort((a, b) => a.x - b.x);
+        return row.items.map((item) => item.str).join("\t");
+      })
+      .join("\n");
+
+    rawDocs.push(new Document({ pageContent: text, metadata: { pageNumber: i, loc: { pageNumber: i } } }));
   }
 
   // Detect scanned (image-only) PDFs — no text extractable
@@ -44,14 +74,14 @@ export async function loadPDF(pdfPath: string) {
   }
 
   const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 350,
-    chunkOverlap: 50,
+    chunkSize: 1000,
+    chunkOverlap: 200,
   });
 
   const docs = await splitter.splitDocuments(rawDocs);
 
   docs.forEach((doc) => {
-    const pageNum = doc.metadata?.loc?.pageNumber || "Unknown";
+    const pageNum = doc.metadata?.pageNumber || doc.metadata?.loc?.pageNumber || "Unknown";
     doc.pageContent = `search_document: Page ${pageNum}:\n${doc.pageContent}`;
   });
 
@@ -104,7 +134,7 @@ export async function loadPDF(pdfPath: string) {
 }
 
 
-export async function askQuestion(question: string, model: string = "gemma4") {
+export async function askQuestion(question: string, model: string = "gemma4", isOnline: boolean = false) {
   const client = await weaviate.connectToLocal();
   const vectorStore = new WeaviateStore(embeddings, {
     client,
@@ -112,21 +142,50 @@ export async function askQuestion(question: string, model: string = "gemma4") {
   });
 
   // Native Weaviate Hybrid Search (0.5 = 50% dense vectors, 50% BM25 sparse vectors)
-  let docs = await vectorStore.hybridSearch(question, { 
+  let docs = await vectorStore.hybridSearch(question, {
     alpha: 0.5,
-    limit: 5 
+    limit: 5
   });
 
   const context = docs
     .map((d) => d.pageContent)
     .join("\n\n");
 
-  const llm = new Ollama({
-    model,
-    baseUrl: "http://localhost:11434",
-  });
+  let response = "";
 
-  const response = await llm.invoke(`
+  if (isOnline) {
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) {
+      throw new Error("GITHUB_TOKEN is not configured. Please paste your GitHub PAT in your .env.local file.");
+    }
+    const openai = new OpenAI({
+      apiKey: token,
+      baseURL: "https://models.github.ai/inference",
+    });
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: `Answer ONLY using the context below.
+
+Context:
+${context}
+
+Question:
+${question}`,
+        },
+      ],
+    });
+    response = completion.choices[0]?.message?.content || "No response received from online model.";
+  } else {
+    const llm = new Ollama({
+      model,
+      baseUrl: "http://localhost:11434",
+    });
+
+    response = await llm.invoke(`
 Answer ONLY using the context below.
 
 Context:
@@ -135,6 +194,7 @@ ${context}
 Question:
 ${question}
 `);
+  }
 
   if (settings.LOCAL_DEBUGGING) {
     const debugDir = path.join(process.cwd(), "_local_debug");
@@ -151,7 +211,16 @@ ${question}
 
   return {
     answer: response,
-    context,
+    sources: docs.map((d) => {
+      // Robust extraction: Regex match first, then flat key, then nested key
+      const match = d.pageContent.match(/^search_document: Page (\d+|Unknown):\n/);
+      const pageNumber = match ? match[1] : (d.metadata?.pageNumber ?? d.metadata?.loc?.pageNumber ?? "Unknown");
+      const cleanContent = d.pageContent.replace(/^search_document: Page (\d+|Unknown):\n/, "");
+      return {
+        pageContent: cleanContent,
+        pageNumber,
+      };
+    }),
   };
 }
 

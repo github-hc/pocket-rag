@@ -5,7 +5,8 @@ export async function POST(req: Request) {
 
   const result = await askQuestion(
     body.question,
-    body.model
+    body.model,
+    body.isOnline
   );
 
   return Response.json(result);

@@ -220,7 +220,24 @@ npm install --legacy-peer-deps
 
 > The `--legacy-peer-deps` flag is needed because some LangChain packages have minor version conflicts. This is safe and required.
 
-### Step 4 — Run the App
+### Step 4 — Environment Configuration (For Online Mode)
+
+If you plan to use **Online Mode** (GitHub free-tier models), you need to configure your GitHub Personal Access Token (PAT):
+
+1. **Copy the example env file:**
+   ```bash
+   cp .env.example .env.local
+   ```
+2. **Generate a GitHub PAT:**
+   * Go to [GitHub Developer Settings (Tokens)](https://github.com/settings/tokens).
+   * Create a new token (classic or fine-grained). No special scopes/permissions are needed for model inference.
+3. **Add the token to your local environment file:**
+   * Open `.env.local` and paste your token:
+     ```env
+     GITHUB_TOKEN=your_github_pat_here
+     ```
+
+### Step 5 — Run the App
 
 ```bash
 npm run dev
@@ -232,11 +249,11 @@ Open **http://localhost:3000** in your browser. You should see the PDF Assistant
 
 ## Usage
 
-1. **Select a PDF** — Click "Select PDF" in the top bar and choose any PDF file from your computer.
+1. **Select a PDF** — Click "Select PDF" in the **Upload your PDF here** section of the Right-Hand Sidebar and choose any PDF file from your computer.
 2. **Upload & Index** — Click **Upload**. Wait for the status to change to "PDF Indexed ✅". (This may take 30–60 seconds for large PDFs.)
-3. **Choose a Model** — Use the dropdown to switch between **Gemma 4** (more capable) and **Phi-3 Mini** (faster).
+3. **Select Mode & Model** — In the **LLM SETTINGS** sidebar panel, toggle between **Offline** and **Online** modes. When offline, select your preferred local model (Gemma 4 or Phi-3 Mini) using the dropdown.
 4. **Ask Questions** — Type your question and press **Enter** or click the send button.
-5. **Clear & Reload** — Click **Clear DB** to remove the current PDF and upload a new one.
+5. **Clear & Reload** — Click **Clear Database** in the **SYSTEM ACTIONS** section of the sidebar to remove the current PDF and upload a new one.
 
 ---
 

@@ -1,0 +1,15 @@
+export const MESSAGES = {
+  WELCOME: "👋 Welcome! I’m your AI document assistant. Upload a PDF and start chatting with your files",
+  UPLOAD_FAILED: (error: string) => `❌ Upload failed: ${error}`,
+  UPLOAD_SUCCESS: (fileName: string) => `Successfully indexed ${fileName}! What would you like to know about it?`,
+  THINKING: "Thinking...",
+  ASK_PLACEHOLDER: "Ask a question about your document...",
+  ONLINE_LIMITS_NOTICE: "The system is configured to use available online models under the free tier. In the event of limited availability, it will fall back to a local offline model",
+  PDF_SUPPORT_WARNING: "We currently support text-based PDFs and basic layout tables. Image-only PDFs and OCR extraction are not supported.",
+  DATABASE_CLEARED: "Database cleared! You can upload a new PDF now.",
+  DELETE_CONFIRMATION: "Are you sure you want to delete the current PDF from the database?",
+  ONLINE_MODEL_ERROR: (error: string) => `⚠️ Online model error: ${error}`,
+  FALLBACK_TO_OFFLINE: (model: string) => `🔄 Online query failed. Falling back to the offline local model (${model})...`,
+  OFFLINE_FALLBACK_ERROR: (error: string) => `❌ Offline fallback error: ${error}`,
+  ASK_ERROR: (error: string) => `Error: ${error}`,
+};
