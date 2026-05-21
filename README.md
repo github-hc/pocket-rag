@@ -6,6 +6,9 @@
 
 **Perfect for:** private documents, sensitive data, offline environments, air-gapped systems, or anyone who wants a free, local alternative to ChatGPT PDF tools.
 
+<img width="2873" height="1552" alt="image" src="https://github.com/user-attachments/assets/658f8e36-6525-4c85-ad6e-a5a7bdd54281" />
+
+
 ---
 
 ## Key Features
@@ -55,51 +58,8 @@ The AI never guesses — it only answers from your document. This technique is c
 
 ## How It Works (Under the Hood)
 
-Here is the complete architecture of the RAG pipeline, showing both the ingestion of your documents and how your queries are answered:
+<img width="3920" height="2803" alt="image" src="https://github.com/user-attachments/assets/8d205931-1dc3-4365-b969-eaaa097651a8" />
 
-```mermaid
-graph LR
-    %% Nodes
-    KB[(Knowledge<br>Base<br>PDFs)]
-    DC[Data<br>Chunks]
-    EM[Embedding<br>Model<br>nomic-embed]
-    VDB[(Vector DB<br>Weaviate)]
-    User((User))
-    UQ[User<br>Query]
-    RD[Retrieved<br>Documents]
-    LLM[LLM<br>gemma4 / phi3]
-    Ans[Final<br>Answer]
-
-    %% Ingestion Flow
-    KB --> DC
-    DC --> EM
-    EM -->|Document<br>Embedding| VDB
-
-    %% Query Flow
-    User --> UQ
-    UQ --> EM
-    EM -->|Query<br>Embedding| VDB
-
-    %% Retrieval & Generation
-    VDB --> RD
-    RD -->|Context| LLM
-    UQ -->|Prompt| LLM
-    LLM --> Ans
-    Ans --> User
-
-    %% Styling
-    classDef db fill:#ffb74d,stroke:#f57c00,stroke-width:2px,color:#000;
-    classDef model fill:#c8e6c9,stroke:#81c784,stroke-width:2px,color:#000;
-    classDef data fill:#e0f7fa,stroke:#00bcd4,stroke-width:2px,color:#000;
-    classDef user fill:#90caf9,stroke:#1e88e5,stroke-width:2px,color:#000;
-    classDef answer fill:#ce93d8,stroke:#ab47bc,stroke-width:2px,color:#000;
-
-    class KB,VDB db;
-    class EM,LLM model;
-    class DC,RD,UQ data;
-    class User user;
-    class Ans answer;
-```
 
 ### Step 1 — PDF Upload & Indexing
 ```
@@ -336,5 +296,3 @@ doc-search-app/
 │   └── debug_qna.txt
 └── uploads/                   # Temporary storage for uploaded PDFs
 ```
-## UI
-<img width="2870" height="1550" alt="image" src="https://github.com/user-attachments/assets/ab8f36b2-2ff8-43f4-9f8d-bccb33345d67" />
