@@ -56,9 +56,10 @@ The AI never guesses — it only answers from your document. This technique is c
 
 ---
 
-## How It Works (Under the Hood)
+## Architecture
 
-<img width="3920" height="2803" alt="image" src="https://github.com/user-attachments/assets/8d205931-1dc3-4365-b969-eaaa097651a8" />
+<img width="1562" height="1182" alt="image" src="https://github.com/user-attachments/assets/6ef84e03-63cb-4790-9de1-1693e42bb9db" />
+
 
 
 ### Step 1 — PDF Upload & Indexing
