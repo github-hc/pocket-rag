@@ -58,7 +58,9 @@ The AI never guesses — it only answers from your document. This technique is c
 
 ## Architecture
 
-<img width="1562" height="1182" alt="image" src="https://github.com/user-attachments/assets/6ef84e03-63cb-4790-9de1-1693e42bb9db" />
+
+<img width="1774" height="1178" alt="image" src="https://github.com/user-attachments/assets/194e3481-0615-418e-8141-58d0f56b9901" />
+
 
 
 
