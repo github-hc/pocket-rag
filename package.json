@@ -13,6 +13,7 @@
     "@langchain/core": "^0.3.0",
     "@langchain/ollama": "^0.2.0",
     "@langchain/weaviate": "^0.2.3",
+    "@llamaindex/liteparse": "^2.1.2",
     "langchain": "^0.3.4",
     "next": "16.2.6",
     "openai": "^6.39.0",
