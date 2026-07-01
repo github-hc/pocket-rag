@@ -134,7 +134,7 @@ export async function loadPDF(pdfPath: string) {
 }
 
 
-export async function askQuestion(question: string, model: string = "gemma4", isOnline: boolean = false) {
+export async function askQuestion(question: string, model: string = "phi3:mini", isOnline: boolean = false) {
   const client = await weaviate.connectToLocal();
   const vectorStore = new WeaviateStore(embeddings, {
     client,
