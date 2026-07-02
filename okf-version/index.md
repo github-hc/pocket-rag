@@ -7,9 +7,9 @@ description: The master index for Rikalp Capital Private Limited's internal huma
 This manual outlines the guidelines adopted by Rikalp Capital Private Limited for managing workforce operations, expectations, and compliance frameworks. 
 
 ## Core Modules
-An AI agent can navigate our company policies across the following linked modules:
-* [Attendance and Working Hours Policy](attendance_policy.md)
-* [Leave and Holidays Policy](leave_policy.md)
-* [Outstation Tour and Travel Policy](travel_policy.md)
-* [Code of Conduct and Safety](code_of_conduct.md)
-* [Whistleblower Policy](whistleblower_policy.md)
+The assistant should use the following document filenames when referencing this policy bundle:
+
+- [Introduction](Introduction.md) — Introduction and HR policy overview
+- [Employment Contract](employment-contract.md) — Employment contract, conduct, and wage guidance
+- [Leave Policy](leave-policy.md) — Leave entitlements, holidays, and attendance rules
+- [Office Policy](office-policy.md) — Office conduct, workplace safety, attendance, and whistleblower procedures

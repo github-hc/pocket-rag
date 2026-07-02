@@ -5,7 +5,7 @@ import { Ollama } from "@langchain/ollama";
 import settings from "./settings";
 
 const OKF_DIR = path.join(process.cwd(), "okf-version");
-const RESERVED = ["index.md", "log.md"];
+const RESERVED = new Set(["index.md", "index", "log.md", "log"]);
 
 interface OKFFile {
   filename: string;
@@ -13,6 +13,19 @@ interface OKFFile {
   type: string;
   description: string;
   body: string;
+}
+
+function isReservedFile(filename: string): boolean {
+  return RESERVED.has(filename.toLowerCase());
+}
+
+function deriveTitle(filename: string, raw: string): string {
+  const stem = path.basename(filename, path.extname(filename));
+
+  const headingMatch = raw.match(/^#{1,6}\s+(.+)$/m);
+  if (headingMatch?.[1]) return headingMatch[1].trim();
+
+  return stem.replace(/[-_]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function parseOKF(filename: string): OKFFile | null {
@@ -42,7 +55,7 @@ function parseOKF(filename: string): OKFFile | null {
 
   return {
     filename,
-    title: frontmatter.title || filename,
+    title: frontmatter.title || deriveTitle(filename, raw),
     type: frontmatter.type || "unknown",
     description: frontmatter.description || "",
     body,
@@ -53,7 +66,7 @@ function loadAllConcepts(): OKFFile[] {
   if (!fs.existsSync(OKF_DIR)) return [];
   return fs
     .readdirSync(OKF_DIR)
-    .filter((f) => f.endsWith(".md") && !RESERVED.includes(f))
+    .filter((f) => f.endsWith(".md") && !isReservedFile(f))
     .map((f) => parseOKF(f))
     .filter(Boolean) as OKFFile[];
 }
